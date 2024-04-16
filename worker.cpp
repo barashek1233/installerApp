@@ -1,0 +1,294 @@
+#include "worker.h"
+
+Worker::Worker(QObject *parent, int id) : QThread{parent}
+{
+    worker_id = id;
+
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Create worker";
+
+    current_IP = "";
+    current_Role = "";
+    current_CycleInstallFlag = false;
+
+    script_path = "";
+    archive_path = "";
+    workflow_path = "";
+    main_path = QDir::currentPath();
+
+    miscdir = "";
+    password = "";
+
+    progress_status = 0;
+
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Create installer process";
+    installer = new QProcess(this);
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Create ping process";
+    ping = new QProcess(this);
+
+    term = false;
+
+    connect(installer, &QProcess::readyReadStandardOutput, this, &Worker::read_InstallerOutput);
+    connect(installer, &QProcess::readyReadStandardError, this, &Worker::read_InstallerError);
+
+    connect(installer, &QProcess::readyReadStandardOutput, this, &Worker::iterate_Progress);
+    connect(installer, &QProcess::readyReadStandardError, this, &Worker::iterate_Progress);
+}
+
+Worker::~Worker()
+{
+    disconnect(installer, &QProcess::readyReadStandardOutput, this, &Worker::read_InstallerOutput);
+    disconnect(installer, &QProcess::readyReadStandardError, this, &Worker::read_InstallerError);
+
+    disconnect(installer, &QProcess::readyReadStandardOutput, this, &Worker::iterate_Progress);
+    disconnect(installer, &QProcess::readyReadStandardError, this, &Worker::iterate_Progress);
+
+    delete installer;
+    delete ping;
+}
+
+void Worker::run()
+{
+    progress_status = 0;
+    emit ProgressChanged(progress_status);
+
+    term = false;
+
+    int err = check_Parameters();
+    if(err != 0)
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Stop thread with error code " << err;
+        term = true;
+        emit FullInstall_finished();
+        return;
+    }
+    arguments.clear();
+    arguments << "--ip=" + current_IP;
+    arguments << "--role=" + current_Role.toLower();
+    arguments << "--pkg=" + archive_path;
+    arguments << "--miscdir=" + miscdir;
+    if(password != "") arguments << "--password=" + password;
+
+    qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << workflow_path;
+    bool ch_dir_error = QDir::setCurrent(workflow_path);
+
+    if(!ch_dir_error)
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Crash installer process, can't change dir!";
+        term = true;
+        emit FullInstall_finished();
+        return;
+    }
+
+    do
+    {
+        pre_ping();
+
+        emit OneInstall_started();
+
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "Current dir: " << QDir::currentPath();
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "Run install script " << script_path << "with args: " << arguments;
+        qDebug(log_Worker()) << "id:" << worker_id << ":" << "Command: " << script_path + " " + arguments.join(" ");
+
+        installer->start(script_path, arguments);
+        installer->waitForFinished(600000);
+        err = installer->exitStatus();
+
+        qDebug(log_Worker()) << "id:" << worker_id << ":" << "Exit Status " << err;
+        qDebug(log_Worker()) << "id:" << worker_id << ":" << "Exit Code " << installer->exitCode();
+        qDebug(log_Worker()) << "id:" << worker_id << ":" << "Normal situation is Status = 0 Code = 0";
+
+        if(err != QProcess::NormalExit)
+        {
+            qCritical(log_Worker()) << "id:" << worker_id << ":" << "Crash installer process";
+            term = true;
+            emit FullInstall_finished();
+
+            qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << main_path;
+            QDir::setCurrent(main_path);
+            return;
+        }
+        if(installer->exitCode() != 0)
+        {
+            qCritical(log_Worker()) << "id:" << worker_id << ":" << "Exit code " << installer->exitCode();
+
+            term = true;
+            emit FullInstall_finished();
+
+            qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << main_path;
+            QDir::setCurrent(main_path);
+            return;
+        }
+
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "Install script finished";
+
+#ifdef NDEBUG
+        after_ping();
+#endif
+
+        emit OneInstall_finished();
+
+        sleep(1);
+    }
+    while(current_CycleInstallFlag);
+
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Full Install script finished";
+
+    qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << main_path;
+    QDir::setCurrent(main_path);
+
+    emit FullInstall_finished();
+}
+
+void Worker::stop()
+{
+    installer->kill();
+
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Install script terminated";
+
+    qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << main_path;
+    QDir::setCurrent(main_path);
+
+    term = true;
+
+    this->terminate();
+}
+
+void Worker::read_InstallerOutput()
+{
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Installer output: " << QString(installer->readAllStandardOutput());
+}
+
+void Worker::read_InstallerError()
+{
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Installer error: " << QString(installer->readAllStandardError());
+}
+
+void Worker::iterate_Progress()
+{
+    progress_status++;
+    if(progress_status > 100)
+    {
+        progress_status = 0;
+    }
+
+    emit ProgressChanged(progress_status);
+}
+
+void Worker::set_IP(QString ip)
+{
+    current_IP = ip;
+}
+
+void Worker::set_Role(QString role)
+{
+    current_Role = role;
+}
+
+void Worker::set_CycleInstallFlag(bool flag)
+{
+    current_CycleInstallFlag = flag;
+}
+
+void Worker::set_script_path(QString path)
+{
+    QStringList tmp = path.split("/");
+    tmp.removeLast();
+    workflow_path = tmp.join("/");
+    script_path = "./" + path.split("/").last();
+
+    qDebug() << "workflow: " << workflow_path;
+    qDebug() << "script: " << script_path;
+}
+
+void Worker::set_archive_path(QString path)
+{
+    archive_path = path;
+}
+
+void Worker::set_miscdir(QString path)
+{
+    miscdir = path;
+}
+
+void Worker::set_password(QString password)
+{
+    this->password = password;
+}
+
+void Worker::set_WaitIP(QString ip)
+{
+    wait_IP = ip;
+}
+
+int Worker::check_Parameters()
+{
+    int return_value = 0;
+    if(current_IP == "")
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Ip adress isn't set!";
+        return_value+=1;
+    }
+    if((current_Role == "") | (current_Role.toLower() == "none"))
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Role isn't set!";
+        return_value+=2;
+    }
+    if(current_CycleInstallFlag == false)
+    {
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "Cycle Install Flag is false";
+    }
+    if(script_path == "")
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Script path isn't set!";
+        return_value+=4;
+    }
+    if(archive_path == "")
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Archive path isn't set!";
+        return_value+=8;
+    }
+    if(miscdir == "")
+    {
+        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Miscdir path isn't set!";
+        return_value+=16;
+    }
+    if(password == "")
+    {
+        qWarning(log_Worker()) << "id:" << worker_id << ":" << "Password isn't set!";
+    }
+    return return_value;
+}
+
+void Worker::pre_ping()
+{
+    ping_args.clear();
+    ping_args << "-c1" << "-W1" << current_IP;
+
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "Pre ping " << current_IP;
+
+    int i = 0;
+    do
+    {
+        i = ping->execute("ping", ping_args);
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "Try ping ";
+    }
+    while(i != 0);
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "End ping ";
+}
+
+void Worker::after_ping()
+{
+    ping_args.clear();
+    ping_args << "-c1" << "-W1" << wait_IP;
+
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "After ping " << current_IP;
+
+    int i = 0;
+    do
+    {
+        i = ping->execute("ping", ping_args);
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "Try ping ";
+    }
+    while(i != 0);
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "End ping ";
+}
