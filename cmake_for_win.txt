@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.5)
+
+# Установка стандарта C++
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Проект
+project(cube_istaller VERSION 0.1 LANGUAGES CXX)
+
+# Включение автоматического создания файлов UI, MOC и RCC для Qt
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+# Поиск необходимых компонентов Qt
+find_package(QT NAMES Qt5 COMPONENTS Widgets REQUIRED)
+
+# Определение исходных файлов проекта
+set(PROJECT_SOURCES
+        mainwindow.ui
+        config.ui
+        mainwindow.h
+        config.h
+        parser.h
+        worker.h
+        loger.h
+        main.cpp
+        mainwindow.cpp
+        config.cpp
+        parser.cpp
+        worker.cpp
+        loger.cpp
+        parser.py
+        build_Ubuntu16.sh
+        deploy.sh
+)
+
+# Создание исполняемого файла
+add_executable(cube_istaller ${PROJECT_SOURCES})
+
+# Связывание с библиотеками Qt
+target_link_libraries(cube_istaller PRIVATE Qt5::Widgets)
+
+# Установка
+if(WIN32)
+    install(TARGETS cube_istaller
+        RUNTIME DESTINATION bin
+        LIBRARY DESTINATION lib)
+else()
+    install(TARGETS cube_istaller
+        BUNDLE DESTINATION .
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
