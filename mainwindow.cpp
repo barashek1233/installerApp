@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     config_window = new Config();
 
-    config_window->set_ProgramPath(QDir::currentPath());
+    // config_window->set_ProgramPath(QDir::currentPath());
 
     qInfo(log_Main()) << "Get saved config data";
     path_archive = config_window->get_ArchivePath();
