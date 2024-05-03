@@ -4,9 +4,16 @@ Worker::Worker(QObject *parent, int id) : QThread{parent}
 {
     worker_id = id;
 
+    str_worker_id = QString::number(worker_id);
+    mac_script_path = "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_script.sh";
+    mac_address_file_path = QString("/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_address_") + str_worker_id + QString(".txt");
+    old_mac_address = "";
+    new_mac_address = "";
+
     qInfo(log_Worker()) << "id:" << worker_id << ":" << "Create worker";
 
     current_IP = "";
+    MAC_address = "";
     current_Role = "";
     current_CycleInstallFlag = false;
 
@@ -63,9 +70,10 @@ void Worker::run()
     }
     arguments.clear();
     arguments << "--ip=" + current_IP;
-    arguments << "--role=" + current_Role.toLower();
+    // arguments << "--role=" + current_Role.toLower();
+    trimming_the_path_to_the_file();
     arguments << "--pkg=" + archive_path;
-    arguments << "--miscdir=" + miscdir;
+    // arguments << "--miscdir=" + miscdir;
     if(password != "") arguments << "--password=" + password;
 
     qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << workflow_path;
@@ -89,7 +97,7 @@ void Worker::run()
         qInfo(log_Worker()) << "id:" << worker_id << ":" << "Run install script " << script_path << "with args: " << arguments;
         qDebug(log_Worker()) << "id:" << worker_id << ":" << "Command: " << script_path + " " + arguments.join(" ");
 
-        installer->start(script_path, arguments);
+        installer->execute("bash", (QStringList() << script_path) << arguments);
         installer->waitForFinished(600000);
         err = installer->exitStatus();
 
@@ -130,6 +138,8 @@ void Worker::run()
         sleep(1);
     }
     while(current_CycleInstallFlag);
+
+    old_mac_address = "";
 
     qInfo(log_Worker()) << "id:" << worker_id << ":" << "Full Install script finished";
 
@@ -267,12 +277,19 @@ void Worker::pre_ping()
     qInfo(log_Worker()) << "id:" << worker_id << ":" << "Pre ping " << current_IP;
 
     int i = 0;
+    int result_MAC_address_comparison = 0;
     do
     {
         i = ping->execute("ping", ping_args);
+        if (i == 0) {
+            result_MAC_address_comparison = waiting_new_mac_address();
+            if (result_MAC_address_comparison == 2) qInfo(log_Worker()) << "id:" << worker_id << ":" << " Waiting for a new MAC-address";
+            else if (result_MAC_address_comparison == 1) qInfo(log_Worker()) << "id:" << worker_id << ":" << " pre_ping - Error reading file";
+        }
         qInfo(log_Worker()) << "id:" << worker_id << ":" << "Try ping ";
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << "i = " << i << " result_MAC_address_comparison = " << result_MAC_address_comparison;
     }
-    while(i != 0);
+    while (i != 0 || result_MAC_address_comparison != 0);
     qInfo(log_Worker()) << "id:" << worker_id << ":" << "End ping ";
 }
 
@@ -286,9 +303,41 @@ void Worker::after_ping()
     int i = 0;
     do
     {
+        
         i = ping->execute("ping", ping_args);
         qInfo(log_Worker()) << "id:" << worker_id << ":" << "Try ping ";
     }
     while(i != 0);
     qInfo(log_Worker()) << "id:" << worker_id << ":" << "End ping ";
+}
+
+void Worker::trimming_the_path_to_the_file() {
+    archive_path = QFileInfo(archive_path).fileName();
+    qInfo(log_Worker()) << "id:" << worker_id << ":" << "The archive_path has been changed to:" << archive_path;
+}
+
+int Worker::waiting_new_mac_address() {
+    
+    installer->execute("bash", {mac_script_path, current_IP, QString::number(worker_id)});
+    sleep(2);
+    QFile file(mac_address_file_path);
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray data;
+        data = file.readLine();
+        new_mac_address = QString(data);
+        file.close();
+    } else {
+        qDebug(log_Worker()) << "id:" << worker_id << ":" << "File: '" << mac_address_file_path << "' not open.";
+        qDebug(log_Worker()) << "id:" << worker_id << ":" << "Error: " << file.error(); 
+        return 1;
+    }
+    if (old_mac_address != new_mac_address) {
+        old_mac_address = new_mac_address;
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << " New MAC address - " << new_mac_address;
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << " The new MAC-address is really new.";
+        return 0;
+    } else {
+        qInfo(log_Worker()) << "id:" << worker_id << ":" << " New MAC address is not new- " << new_mac_address;
+        return 2;
+    }
 }

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(cube_istaller VERSION 0.1 LANGUAGES CXX)
+project(cube_installer VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIred ON)
@@ -43,6 +43,9 @@ set(PROJECT_SOURCES
 add_executable(cube_installer ${PROJECT_SOURCES})
 
 target_link_libraries(cube_installer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+
+add_custom_command(TARGET cube_installer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/parser.py ${CMAKE_CURRENT_BINARY_DIR}/parser.py)
+add_custom_command(TARGET cube_installer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/venv_python ${CMAKE_CURRENT_BINARY_DIR}/venv_python)
 
 install(TARGETS cube_installer
         RUNTIME DESTINATION bin
