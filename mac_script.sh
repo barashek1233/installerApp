@@ -1,4 +1,4 @@
-FILE_MAC="/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_address_$2.txt"
+FILE_MAC="$3/mac_address_$2.txt"
 
 rm $FILE_MAC
 ping -c1 $1

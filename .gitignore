@@ -1,4 +1,5 @@
-build
-.o
-.a
-test
+build/*
+*.o
+*.a
+test/
+.vscode/

@@ -49,6 +49,7 @@ target_link_libraries(cube_installer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 add_custom_command(TARGET cube_installer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/mac_script.sh ${CMAKE_CURRENT_BINARY_DIR}/mac_script.sh)
 add_custom_command(TARGET cube_installer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/parser.py ${CMAKE_CURRENT_BINARY_DIR}/parser.py)
 add_custom_command(TARGET cube_installer POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/venv_python ${CMAKE_CURRENT_BINARY_DIR}/venv_python)
+# file(COPY venv_python DESTINATION ${CMAKE_BINARY_DIR}/venv_python)
 
 install(TARGETS cube_installer
         RUNTIME DESTINATION bin

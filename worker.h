@@ -48,7 +48,6 @@ private slots:
     void iterate_Progress();
 
 private:
-    int open_env_file();
     int worker_id;
     void trimming_the_path_to_the_file();
     int check_Parameters();
