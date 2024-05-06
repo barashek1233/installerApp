@@ -1,1 +1,0 @@
-["pytest", "requests", "pytest-cov", "pip", "pytest-mock", "mock"]

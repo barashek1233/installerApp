@@ -1,9 +1,0 @@
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/cube_installer.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/edit_cache.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/rebuild_cache.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/list_install_components.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/install.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/install/local.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/install/strip.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/cube_installer_autogen_timestamp_deps.dir
-/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/CMakeFiles/cube_installer_autogen.dir
