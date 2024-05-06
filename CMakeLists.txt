@@ -13,6 +13,8 @@ set(CMAKE_AUTORCC ON)
 
 
 set(CMAKE_PREFIX_PATH "/usr/local/opt/qt6")
+# for my bubuntu
+# set(CMAKE_PREFIX_PATH "/home/linuxbrew/.linuxbrew/Cellar/qt/6.7.0_1")
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)

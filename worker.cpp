@@ -3,10 +3,14 @@
 Worker::Worker(QObject *parent, int id) : QThread{parent}
 {
     worker_id = id;
-
+    if (open_env_file()) {
+        qInfo(log_Worker()) << "env file error: " << path_for_build_directory;  //  - > path_for_build_directory = path_directory
+    }
     str_worker_id = QString::number(worker_id);
-    mac_script_path = "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_script.sh";
-    mac_address_file_path = QString("/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_address_") + str_worker_id + QString(".txt");
+    mac_script_path = path_for_build_directory + QString("mac_script.sh");
+    // mac_script_path = "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_script.sh";
+    mac_address_file_path = path_for_build_directory + QString("mac_address_") + str_worker_id + QString(".txt");
+    // mac_address_file_path = QString("/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/build/mac_address_") + str_worker_id + QString(".txt");
     old_mac_address = "";
     new_mac_address = "";
 
@@ -339,5 +343,18 @@ int Worker::waiting_new_mac_address() {
     } else {
         qInfo(log_Worker()) << "id:" << worker_id << ":" << " New MAC address is not new- " << new_mac_address;
         return 2;
+    }
+}
+
+int Worker::open_env_file(){
+    QFile env_file("../env.txt");
+    if (env_file.open(QIODevice::ReadOnly)) {
+        QByteArray data_env_file;
+        data_env_file = env_file.readLine();
+        path_for_build_directory = QString(data_env_file);
+        env_file.close();
+        return 0;
+    } else {
+        return 1;
     }
 }

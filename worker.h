@@ -6,7 +6,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
-#include <QFшle>
+#include <QFile>
 #include <QByteArray>
 
 #include "loger.h"
@@ -48,6 +48,7 @@ private slots:
     void iterate_Progress();
 
 private:
+    int open_env_file();
     int worker_id;
     void trimming_the_path_to_the_file();
     int check_Parameters();
@@ -64,6 +65,7 @@ private:
     QString old_mac_address;
     QString new_mac_address;
     QString mac_script_path;
+    QString path_for_build_directory;
 
     QString     current_IP;
     QString     MAC_address;
