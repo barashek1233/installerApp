@@ -1,0 +1,42 @@
+{
+        "DefaultAppService": "org.aqsi.Vend",
+        "Model": 1234,
+        "CheckReport": true,
+        "SalesStatisticSource": 0,
+        "EvaDtsReportSchedule": {
+            "Weekday": [
+                "mon",
+                "tue",
+                "wed",
+                "thu",
+                "fri",
+                "sat",
+                "sun"
+            ],
+            "TimeFrom": "00:00",
+            "TimeTo": "00:00",
+            "Period": 2
+        },
+        "BusInactiveTimeout": 180,
+        "MainMode": 1,
+        "ClientEnable": 0,
+        "CashlessLevel": 1,
+        "CashlessAddress": 16,
+        "ScaleFactor": 1,
+        "DecimalPlacesCash": 2,
+        "DecimalPlacesCashless": 2,
+        "VMCAuditPortEnable": false,
+        "VMCAuditPort": 1,
+        "VMCAuditBaudRate": 9600,
+        "VMCAuditProtocol": 0,
+        "AcquiringShiftCloseTime": "12:00",
+        "AcquiringShiftClosePeriod": 1,
+        "CCAuditPortEnable": false,
+        "PosMode": 0,
+        "PosPort": 0,
+        "NtpDisable": true,
+        "JpayDisable": true,
+        "DeviceNonGuiModeEnabled": true,
+        "DoNotStopDm": 1,
+        "CellularRouterModeEnable": false
+}

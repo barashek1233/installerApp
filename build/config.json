@@ -1,0 +1,49 @@
+{
+    "DHCP": [
+        "192.168.1.102",
+        "192.168.1.106",
+        "192.168.1.110",
+        "192.168.1.114"
+    ],
+    "InstallArchivePath": "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/os/3K_btt_2_1_1/cube_btt_downloader_2.2.1.tar.gz",
+    "InstallPassword": "",
+    "InstallScriptPath": "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/os/3K_btt_2_1_1/install_service.sh",
+    "MasterFiles": "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/os/masters_file",
+    "Roles": [
+        "Master",
+        "Master --router",
+        "Slave1",
+        "Slave2",
+        "Slave3",
+        "Slave4",
+        "Slave5"
+    ],
+    "RolesIPs": {
+        "Master": "192.168.1.10",
+        "Master --router": "192.168.1.10",
+        "Slave1": "192.168.1.11",
+        "Slave2": "192.168.1.12",
+        "Slave3": "192.168.1.13",
+        "Slave4": "192.168.1.14",
+        "Slave5": "192.168.1.15"
+    },
+    "SlaveFiles": "/Users/polzovatel/work/aqsi_proj/TerminalInstallerApp/installerAppForMac_0.1/installerApp/os/slaves_file",
+    "StartCycleInstallValue": [
+        false,
+        false,
+        false,
+        false
+    ],
+    "StartIPs": [
+        "192.168.1.102",
+        "192.168.1.106",
+        "192.168.1.110",
+        "192.168.1.114"
+    ],
+    "StartRoles": [
+        "Master",
+        "Slave1",
+        "Slave2",
+        "Slave3"
+    ]
+}
