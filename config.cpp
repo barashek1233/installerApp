@@ -161,7 +161,7 @@ bool Config::readConfigFile(QString config_name)
 
     emit masterFiles_updated(master_files.toString());
     emit slaveFiles_updated(slave_files.toString());
-
+    emit config_name_update();
     emit rolesList_updated();
     emit ipList_updated();
 
@@ -213,27 +213,33 @@ void Config::update_SettingsValues()
             roles_list.append(Roles[i].toString());
         }
     }
+    QStringList config_names_list;
+    for (size_t index = 0; index < Config_Names.size(); index++) {
+        config_names_list.append(Config_Names[index]);
+    }
 
-    ui->comboBox_name->blockSignals(true);
+    ui->comboBox_2->blockSignals(true);
 
     ui->comboBox_A->blockSignals(true);
     ui->comboBox_B->blockSignals(true);
     ui->comboBox_C->blockSignals(true);
     ui->comboBox_D->blockSignals(true);
 
-    ui->comboBox_name->clear();
+    ui->comboBox_2->clear();
 
     ui->comboBox_A->clear();
     ui->comboBox_B->clear();
     ui->comboBox_C->clear();
     ui->comboBox_D->clear();
 
-    ui->comboBox_name->addItems();
+    ui->comboBox_2->addItems(config_names_list);
 
     ui->comboBox_A->addItems(roles_list);
     ui->comboBox_B->addItems(roles_list);
     ui->comboBox_C->addItems(roles_list);
     ui->comboBox_D->addItems(roles_list);
+
+    ui->comboBox_2->blockSignals(false);
 
     ui->comboBox_A->blockSignals(false);
     ui->comboBox_B->blockSignals(false);
@@ -654,7 +660,7 @@ QStringList Config::get_config_name() {
     QStringList list;
 
     for(size_t index = 0; index < Config_Names.size(); index++) {
-        list.append(Config_Names[index].toString());
+        list.append(Config_Names[index]);
     }
 
     return list;

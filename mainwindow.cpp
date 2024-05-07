@@ -50,8 +50,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(config_window, &Config::portIPs_updated, this, &MainWindow::update_PortIPs);
     connect(config_window, &Config::portCycleInstalls_updated, this, &MainWindow::update_PortCycleInstall);
     //  добавить сигнал и соеденить для обновления имен конфига и далее
+    
     connect(config_window, &Config::rolesList_updated, this, &MainWindow::update_Roles);
-
+    connect(config_window, &Config::config_name_update, this, &MainWindow::update_Config_Name);
     connect(config_window, &Config::masterFiles_updated, this, &MainWindow::update_MasterFiles);
     connect(config_window, &Config::slaveFiles_updated, this, &MainWindow::update_SlaveFiles);
 
@@ -280,8 +281,8 @@ void MainWindow::update_Config_Name() {
     qInfo(log_Main()) << "Update available config name";
 
     config_name_list = config_window->get_config_name();
-    ui->cb_config_name->clear();
-    ui->cb_config_name->addItems(config_name_list)
+    ui->comboBox->clear();
+    ui->comboBox->addItems(config_name_list);
 }
 
 void MainWindow::update_IPs(PortNames port_name, QString ip)

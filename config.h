@@ -33,7 +33,7 @@ public:
     explicit Config(QWidget *parent = nullptr);
     ~Config();
 
-    bool readConfigFile();
+    bool readConfigFile(QString config_name = "Sample");
 
     QString get_ScriptPath();
     QString get_ArchivePath();
@@ -59,7 +59,7 @@ signals:
     void portIPs_updated();
     void portRoles_updated();
     void portCycleInstalls_updated();
-
+    void config_name_update();
     void rolesList_updated();
     void ipList_updated();
 
@@ -122,7 +122,7 @@ private:
 
     QJsonArray      DHCP_IP_List;
     QJsonArray      Roles;
-    QJsonArray      Config_Names;
+    QStringList     Config_Names;
     QJsonObject     Roles_IP_List;
 
     QJsonArray      StartIPs;
