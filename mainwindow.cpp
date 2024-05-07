@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     install_password = config_window->get_InstallPassword();
 
     update_Roles();
-
+    update_Config_Name();  //   Добавить метод для обновления конфиг нейма по аналогии с update_Roles()
     update_PortRoles();
     update_PortIPs();
     update_PortCycleInstall();
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(config_window, &Config::portRoles_updated, this, &MainWindow::update_PortRoles);
     connect(config_window, &Config::portIPs_updated, this, &MainWindow::update_PortIPs);
     connect(config_window, &Config::portCycleInstalls_updated, this, &MainWindow::update_PortCycleInstall);
-
+    //  добавить сигнал и соеденить для обновления имен конфига и далее
     connect(config_window, &Config::rolesList_updated, this, &MainWindow::update_Roles);
 
     connect(config_window, &Config::masterFiles_updated, this, &MainWindow::update_MasterFiles);
@@ -274,6 +274,14 @@ void MainWindow::update_Roles()
     ui->gb_2_comb->addItems(role_list);
     ui->gb_3_comb->addItems(role_list);
     ui->gb_4_comb->addItems(role_list);
+}
+
+void MainWindow::update_Config_Name() {
+    qInfo(log_Main()) << "Update available config name";
+
+    config_name_list = config_window->get_config_name();
+    ui->cb_config_name->clear();
+    ui->cb_config_name->addItems(config_name_list)
 }
 
 void MainWindow::update_IPs(PortNames port_name, QString ip)

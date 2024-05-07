@@ -3,21 +3,21 @@
 
 #include <QDebug>
 
-Config::Config(QWidget *parent) : QDialog(parent), ui(new Ui::Config)
+Config::Config(QWidget *parent) : QDialog(parent), ui(new Ui::Config)  //  вопрос как передать какой конфиг открывать
 {
     qInfo(log_Config()) << "Create Config";
 
     ui->setupUi(this);
 
-    set_ConfigPath("./config.json");
+    set_ConfigPath("./config.json");  //  -> config_path = ./config.json
 
-    if(!readConfigFile())
+    if(!readConfigFile("Sample"))
     {
         qWarning(log_Config()) << "Can't read config file when app has started";
 
-        create_NewConfigFile();
+        create_NewConfigFile();  //  если конфига нет, создаем новый шаблон 
 
-        readConfigFile();
+        readConfigFile("Sample");  //  и открываем его
     }
 
     connect(ui->open_ScPath, &QPushButton::clicked, this, &Config::set_ScriptPath);
@@ -99,11 +99,11 @@ void Config::set_ConfigPath(QString path)
     config_path = path;
 }
 
-bool Config::readConfigFile()
+bool Config::readConfigFile(QString config_name)
 {
     qInfo(log_Config()) << "Read config file";
 
-    config_file.setFileName(config_path);
+    config_file.setFileName(config_path);  //  а мне нравится эта запись надо перенять в воркер
     bool err = config_file.open(QIODevice::ReadOnly);
     if(!err)
     {
@@ -121,7 +121,9 @@ bool Config::readConfigFile()
 
     config_file.close();
 
-    config_data = config_doc.object();
+    config_data_sample = config_doc.object();
+    Config_Names = config_data_sample.keys();
+    config_data = config_data_sample.value(config_name).toObject();
 
     install_script_path = config_data.value("InstallScriptPath");
     install_archive_path = config_data.value("InstallArchivePath");
@@ -212,15 +214,21 @@ void Config::update_SettingsValues()
         }
     }
 
+    ui->comboBox_name->blockSignals(true);
+
     ui->comboBox_A->blockSignals(true);
     ui->comboBox_B->blockSignals(true);
     ui->comboBox_C->blockSignals(true);
     ui->comboBox_D->blockSignals(true);
 
+    ui->comboBox_name->clear();
+
     ui->comboBox_A->clear();
     ui->comboBox_B->clear();
     ui->comboBox_C->clear();
     ui->comboBox_D->clear();
+
+    ui->comboBox_name->addItems();
 
     ui->comboBox_A->addItems(roles_list);
     ui->comboBox_B->addItems(roles_list);
@@ -314,8 +322,8 @@ void Config::create_NewConfigFile()
     StartCycleInstallValue.push_back(false);
 
     config_data.insert("StartCycleInstallValue", StartCycleInstallValue);
-
-    config_doc.setObject(config_data);
+    config_data_sample.insert("Sample", config_data);
+    config_doc.setObject(config_data_sample);
 
     config_file.write(config_doc.toJson());
 
@@ -639,6 +647,17 @@ bool Config::get_PortCycleInstall(PortNames port_name)
             qCritical(log_Config()) << "Unknown port name: " << port_name;
             return "None";
     }
+}
+
+QStringList Config::get_config_name() {
+    qInfo(log_Config()) << "Get available config name";
+    QStringList list;
+
+    for(size_t index = 0; index < Config_Names.size(); index++) {
+        list.append(Config_Names[index].toString());
+    }
+
+    return list;
 }
 
 QStringList Config::get_Roles()

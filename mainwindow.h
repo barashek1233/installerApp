@@ -38,6 +38,7 @@ private:
     QString export_path_config = "";
 
     QStringList role_list;
+    QStringList config_name_list;
 
     QString install_password = "";
 
@@ -81,6 +82,8 @@ private slots:
     void update_PortCycleInstall();
 
     void update_Roles();
+    /// @brief Обновление и добавление всех доступных имен кофига в mainwindow
+    void update_Config_Name();
     void update_IPs(PortNames port_name, QString ip);
 
     void clear_SameRole(PortNames port_name);

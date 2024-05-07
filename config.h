@@ -48,6 +48,7 @@ public:
     bool get_PortCycleInstall(PortNames port_name);
 
     QStringList get_Roles();
+    QStringList get_config_name();
 
     QString get_RoleWaitIP(QString role);
 
@@ -106,6 +107,7 @@ private:
     Ui::Config *ui;
 
     QJsonObject     config_data;
+    QJsonObject     config_data_sample;  //  Для именования конфигов
     QJsonDocument   config_doc;
     QFile           config_file;
     QString         config_path;
@@ -120,6 +122,7 @@ private:
 
     QJsonArray      DHCP_IP_List;
     QJsonArray      Roles;
+    QJsonArray      Config_Names;
     QJsonObject     Roles_IP_List;
 
     QJsonArray      StartIPs;
