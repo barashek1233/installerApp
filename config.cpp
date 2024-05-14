@@ -20,6 +20,7 @@ Config::Config(QWidget *parent) : QDialog(parent), ui(new Ui::Config)  //  во�
         readConfigFile("Sample");  //  и открываем его
     }
 
+    connect(ui->checkBox_new_name, &QCheckBox::clicked, this, &Config::allow_creatin_new_config_name);
     connect(ui->open_ScPath, &QPushButton::clicked, this, &Config::set_ScriptPath);
     connect(ui->open_ArchPath, &QPushButton::clicked, this, &Config::set_ArchivePath);
 
@@ -37,6 +38,8 @@ Config::Config(QWidget *parent) : QDialog(parent), ui(new Ui::Config)  //  во�
     connect(ui->lineEdit_B, &QLineEdit::textChanged, this, [=]( const QString &value ) { this->change_PortIP(Port_B, value);});
     connect(ui->lineEdit_C, &QLineEdit::textChanged, this, [=]( const QString &value ) { this->change_PortIP(Port_C, value);});
     connect(ui->lineEdit_D, &QLineEdit::textChanged, this, [=]( const QString &value ) { this->change_PortIP(Port_D, value);});
+
+    connect(ui->comboBox_2, &QComboBox::currentTextChanged, this, [=]( const QString &value ) { this->change_config_name(value);});
 
     connect(ui->comboBox_A, &QComboBox::currentTextChanged, this, [=]( const QString &value ) { this->change_PortRole(Port_A, value);});
     connect(ui->comboBox_B, &QComboBox::currentTextChanged, this, [=]( const QString &value ) { this->change_PortRole(Port_B, value);});
@@ -99,7 +102,7 @@ void Config::set_ConfigPath(QString path)
     config_path = path;
 }
 
-bool Config::readConfigFile(QString config_name)
+bool Config::readConfigFile(QString name)
 {
     qInfo(log_Config()) << "Read config file";
 
@@ -123,7 +126,7 @@ bool Config::readConfigFile(QString config_name)
 
     config_data_sample = config_doc.object();
     Config_Names = config_data_sample.keys();
-    config_data = config_data_sample.value(config_name).toObject();
+    config_data = config_data_sample.value(name).toObject();
 
     install_script_path = config_data.value("InstallScriptPath");
     install_archive_path = config_data.value("InstallArchivePath");
@@ -154,14 +157,13 @@ bool Config::readConfigFile(QString config_name)
 
     qInfo(log_Config()) << "Parameters have readen";
 
-    update_SettingsValues();
+    update_SettingsValues(name);
 
     emit scriptPath_updated(install_script_path.toString());
     emit archivePath_updated(install_archive_path.toString());
 
     emit masterFiles_updated(master_files.toString());
     emit slaveFiles_updated(slave_files.toString());
-    emit config_name_update();
     emit rolesList_updated();
     emit ipList_updated();
 
@@ -176,10 +178,10 @@ bool Config::readConfigFile(QString config_name)
     return true;
 }
 
-void Config::update_SettingsValues()
+void Config::update_SettingsValues(QString config_name = "Sample")
 {
     qInfo(log_Config()) << "Update parameters in interface";
-
+    qInfo(log_Config()) << "current template name: " << config_name;
     ui->lb_ScPath->setText(install_script_path.toString());
     ui->lb_ArchPath->setText(install_archive_path.toString());
 
@@ -213,9 +215,11 @@ void Config::update_SettingsValues()
             roles_list.append(Roles[i].toString());
         }
     }
-    QStringList config_names_list;
+
+    config_names_list.clear();
     for (size_t index = 0; index < Config_Names.size(); index++) {
-        config_names_list.append(Config_Names[index]);
+        if (config_name == Config_Names[index]) { config_names_list.prepend(Config_Names[index]); }
+        else { config_names_list.append(Config_Names[index]); }
     }
 
     ui->comboBox_2->blockSignals(true);
@@ -256,10 +260,11 @@ void Config::update_SettingsValues()
     ui->checkBox_C->setChecked(StartCycleInstallValue[2].toBool());
     ui->checkBox_D->setChecked(StartCycleInstallValue[3].toBool());
 
+
     qInfo(log_Config()) << "Update parameters in interface finished";
 }
 
-void Config::create_NewConfigFile()
+void Config::create_NewConfigFile(QString name)
 {
     qInfo(log_Config()) << "Create new config file";
 
@@ -328,7 +333,7 @@ void Config::create_NewConfigFile()
     StartCycleInstallValue.push_back(false);
 
     config_data.insert("StartCycleInstallValue", StartCycleInstallValue);
-    config_data_sample.insert("Sample", config_data);
+    config_data_sample.insert(name, config_data);
     config_doc.setObject(config_data_sample);
 
     config_file.write(config_doc.toJson());
@@ -433,8 +438,8 @@ void Config::set_SlaveFiles(bool ch)
 bool Config::saveEditConfigFile()
 {
     qInfo(log_Config()) << "Save config file";
-
-    config_doc.setObject(config_data);
+    config_data_sample.insert(ui->comboBox_2->currentText(), config_data);
+    config_doc.setObject(config_data_sample);
 
     config_file.setFileName(config_path);
     bool err = config_file.open(QIODevice::WriteOnly | QFile::Truncate);
@@ -776,5 +781,28 @@ void Config::clear_SameRole(PortNames port_name)
     default:
         qCritical(log_Config()) << "Unknown port name: " << port_name;
         break;
+    }
+}
+
+void Config::change_config_name(QString new_config_name) {
+    if (config_names_list.contains(new_config_name)) {
+        readConfigFile(new_config_name);
+        // ui->comboBox_2->setCurrentText(new_config_name);
+        emit config_name_update();
+    } else {
+        readConfigFile();
+    }
+}
+
+void Config::allow_creatin_new_config_name(bool checked) {
+    if (checked) {
+        ui->comboBox_2->blockSignals(true);
+        ui->comboBox_2->setEditable(true);
+    } else if (!checked) {
+        create_NewConfigFile(ui->comboBox_2->currentText());
+        readConfigFile(ui->comboBox_2->currentText());
+        emit config_name_update();
+        ui->comboBox_2->setEditable(false);
+        ui->comboBox_2->blockSignals(false);
     }
 }

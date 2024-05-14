@@ -77,6 +77,9 @@ private slots:
 
     void update_InstallPassword();
 
+    /// @brief слот для обновления конфигурационного файла из главного меню
+    void update_config_name_in_main_window();
+
     void update_PortIPs();
     void update_PortRoles();
     void update_PortCycleInstall();

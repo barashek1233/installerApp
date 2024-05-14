@@ -30,10 +30,11 @@ class Config : public QDialog
     Q_OBJECT
 
 public:
+    QStringList config_names_list;
     explicit Config(QWidget *parent = nullptr);
     ~Config();
 
-    bool readConfigFile(QString config_name = "Sample");
+    bool readConfigFile(QString name = "Sample");
 
     QString get_ScriptPath();
     QString get_ArchivePath();
@@ -55,11 +56,11 @@ public:
 signals:
     void scriptPath_updated(QString path);
     void archivePath_updated(QString path);
+    void config_name_update();
 
     void portIPs_updated();
     void portRoles_updated();
     void portCycleInstalls_updated();
-    void config_name_update();
     void rolesList_updated();
     void ipList_updated();
 
@@ -77,7 +78,13 @@ public slots:
     void export_Config(QString path);
     void set_MainPath(QString path);
 
+    /// @brief метод проверяет наличие имени конфига в конфигурационном файле и если он есть загружает его, если нет загружает стандартный шаблон
+    /// @param new_config_name имя конфига для проверки его наличия
+    void change_config_name(QString new_config_name);
+
 private slots:
+    void allow_creatin_new_config_name(bool checked);
+
     void update_AfterParse();
 
     void set_ConfigPath(QString path);
@@ -92,7 +99,7 @@ private slots:
     void cancelEditConfigFile();
 
     void change_InstallPassword(QString password);
-
+    
     void change_PortIP(PortNames port_name, QString new_ip);
     void change_PortRole(PortNames port_name, QString new_role);
     void change_PortCycleInstall(PortNames port_name, bool new_check);
@@ -100,9 +107,9 @@ private slots:
     void clear_SameRole(PortNames port_name);
 
 private:
-    void update_SettingsValues();
+    void update_SettingsValues(QString config_name);
 
-    void create_NewConfigFile();
+    void create_NewConfigFile(QString name = "Sample");
 
     Ui::Config *ui;
 

@@ -230,9 +230,22 @@
       <rect>
        <x>100</x>
        <y>1</y>
-       <width>431</width>
+       <width>321</width>
        <height>41</height>
       </rect>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBox_new_name">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>10</y>
+       <width>85</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>New name</string>
      </property>
     </widget>
    </widget>

@@ -70,11 +70,11 @@ void Worker::run()
     }
     arguments.clear();
     arguments << "--ip=" + current_IP;
-    // arguments << "--role=" + current_Role.toLower();
+    if (current_Role != "None") arguments << "--role=" + current_Role.toLower();
     trimming_the_path_to_the_file();
     arguments << "--pkg=" + archive_path;
-    // arguments << "--miscdir=" + miscdir;
-    if(password != "") arguments << "--password=" + password;
+    if (miscdir != "") arguments << "--miscdir=" + miscdir;
+    if (password != "") arguments << "--password=" + password;
 
     qDebug(log_Worker()) << "id:" << worker_id << ":" << "Set dir " << workflow_path;
     bool ch_dir_error = QDir::setCurrent(workflow_path);
@@ -238,7 +238,8 @@ int Worker::check_Parameters()
         qCritical(log_Worker()) << "id:" << worker_id << ":" << "Ip adress isn't set!";
         return_value+=1;
     }
-    if((current_Role == "") | (current_Role.toLower() == "none"))
+    // if((current_Role == "") | (current_Role.toLower() == "none"))
+    if(current_Role == "")
     {
         qCritical(log_Worker()) << "id:" << worker_id << ":" << "Role isn't set!";
         return_value+=2;
@@ -257,11 +258,11 @@ int Worker::check_Parameters()
         qCritical(log_Worker()) << "id:" << worker_id << ":" << "Archive path isn't set!";
         return_value+=8;
     }
-    if(miscdir == "")
-    {
-        qCritical(log_Worker()) << "id:" << worker_id << ":" << "Miscdir path isn't set!";
-        return_value+=16;
-    }
+    // if(miscdir == "")
+    // {
+    //     qCritical(log_Worker()) << "id:" << worker_id << ":" << "Miscdir path isn't set!";
+    //     return_value+=16;
+    // }
     if(password == "")
     {
         qWarning(log_Worker()) << "id:" << worker_id << ":" << "Password isn't set!";

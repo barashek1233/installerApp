@@ -58,6 +58,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(config_window, &Config::installPassword_updated, this, &MainWindow::update_InstallPassword);
 
+    //  вызов метода update_config_name_in_main_window для обновления конфигурационного файла
+    connect(ui->comboBox, &QComboBox::currentTextChanged, this, &MainWindow::update_config_name_in_main_window);
+    
+
     connect(ui->gb_1_comb, &QComboBox::currentTextChanged, this, [=](QString value){clear_SameRole(Port_A);});
     connect(ui->gb_2_comb, &QComboBox::currentTextChanged, this, [=](QString value){clear_SameRole(Port_B);});
     connect(ui->gb_3_comb, &QComboBox::currentTextChanged, this, [=](QString value){clear_SameRole(Port_C);});
@@ -278,11 +282,13 @@ void MainWindow::update_Roles()
 }
 
 void MainWindow::update_Config_Name() {
+    ui->comboBox->blockSignals(true);
     qInfo(log_Main()) << "Update available config name";
 
-    config_name_list = config_window->get_config_name();
+    // config_name_list = config_window->get_config_name();
     ui->comboBox->clear();
-    ui->comboBox->addItems(config_name_list);
+    ui->comboBox->addItems(config_window->config_names_list);
+    ui->comboBox->blockSignals(false);
 }
 
 void MainWindow::update_IPs(PortNames port_name, QString ip)
@@ -638,4 +644,10 @@ void MainWindow::finished_Worker(PortNames port_name, bool finish_one)
 
         break;
     }
+}
+
+void MainWindow::update_config_name_in_main_window() {
+    QString current_config_name = ui->comboBox->currentText();
+    qInfo(log_Main()) << "update_config_name_in_main_window - " << current_config_name;
+    config_window->readConfigFile(current_config_name);
 }
